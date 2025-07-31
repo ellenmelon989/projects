@@ -1,0 +1,6 @@
+pwd
+ls 
+echo "hello, world!"
+ls -l | wc
+echo a;echo b;echo c
+cat < lines.txt | ls > tempfile;echo hello
