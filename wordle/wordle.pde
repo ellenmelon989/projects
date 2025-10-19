@@ -12,6 +12,11 @@ String[] guess;
 String[] answers;
 String test;   // will hold the current guess word as constructed
 String ans;
+Button dailyButton;
+Button randomButton;
+boolean daily = false;
+String dailyword = null;
+int rcount= 0;
 
 Box[][] b;
 
@@ -23,7 +28,7 @@ final int YELLOW = 2;
 final int GREEN = 3;
 
 void setup() {
-  size(600, 750);
+  size(600, 875);
 
   answers = loadStrings("wordle_answer_words.txt");
   guess = loadStrings("wordle_guess_words.txt");
@@ -51,9 +56,16 @@ void setup() {
       keys.add(new Key(letter, x, y, keyW, keyH));
     }
   }
+  dailyButton = new Button(100, 800, 200, 50, "Daily");
+  randomButton = new Button(300, 800, 200, 50, "Random");
+  textSize(50);
+  text("Press Tab to reset", 110, 775);
+  
 }
 
 void draw() {
+  dailyButton.display();
+  randomButton.display();
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {
       b[i][j].display();
@@ -69,6 +81,23 @@ void draw() {
     k.display();
   }
   
+}
+
+void fetchDailyWordle() {
+    String yyyy = nf(year(), 4);
+    String mm = nf(month(), 2);
+    String dd = nf(day(), 2);
+    String dateStr = yyyy + "-" + mm + "-" + dd;
+
+    // per date
+    String url = "https://www.nytimes.com/svc/wordle/v2/" + dateStr + ".json";
+
+    JSONObject obj = loadJSONObject(url);
+    String solution = obj.getString("solution");
+
+    dailyword = solution.toUpperCase();
+    println(dailyword);
+    ans = dailyword;
 }
 
 void boxPos() {
@@ -91,8 +120,14 @@ void resetGame() {
   }
   curRow = 0;
   curCol = 0;
-  int r = int(random(answers.length));
-  ans = answers[r];
+  if (daily){
+    thread("fetchDailyWordle");
+    //ans = dailyword;
+  }
+  else {
+    int r = int(random(answers.length));
+    ans = answers[r];
+  }
   gameOver = false;
   for (Key k : keys) {
     k.state = DEFAULT;
@@ -110,15 +145,16 @@ void keyPressed() {
     resetGame();
   }
   if (gameOver) {
-    return; 
+    println(ans);
+    //return; 
   }
   // case insensitive
-  if (key >= 'a' && key <= 'z' || key >= 'A' && key <= 'Z') {
+  if ((key >= 'a' && key <= 'z' || key >= 'A' && key <= 'Z') && !gameOver) {
     if (curCol < cols && curRow < rows) {
       b[curRow][curCol].empty = false;
       b[curRow][curCol].l = new Letter(key);
       curCol++;
-      println(curCol);
+      //println(curCol);
     }
   }
   if (key == ENTER || key == RETURN) {
@@ -130,14 +166,35 @@ void keyPressed() {
         if (curRow < rows - 1) {
           curRow++;
         }
+        if (curRow == rows-1){
+          rcount ++;
+          println(curRow);
+          if (rcount ==2 && !test.equalsIgnoreCase(ans)){ 
+              gameOver = true;
+              println(ans);
+          }
+        }
         curCol = 0;
       }
     }
   }
 }
 
+void mousePressed() {
+  if (dailyButton.isClicked(mouseX, mouseY)) {
+    println("Daily mode selected");
+    daily = true;
+    resetGame();
+  }
+  if (randomButton.isClicked(mouseX, mouseY)) {
+    println("Random mode selected");
+    daily = false;
+    resetGame();
+  }
+}
+
 void checkifword() {
-  println(test);
+  //println(test);
   ifword = false;
   // Check if the current guess is in the guess list
   for (int i = 0; i < guess.length; i++) {
@@ -146,7 +203,7 @@ void checkifword() {
       break;
     }
   }
-  println("Answer: " + ans);
+  //println("Answer: " + ans);
 }
 
 void checkmatch() {
@@ -165,6 +222,7 @@ void checkmatch() {
   }
   if (test.equalsIgnoreCase(ans)) {
     gameOver = true;
+    println(ans);
   }
 }
 
