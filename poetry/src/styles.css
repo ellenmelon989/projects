@@ -1,0 +1,12 @@
+body{
+    background-color:blanchedalmond;
+    font-family: 'Times New Roman', Times, serif;
+}
+@font-face {
+    font-family: 'medieval';
+    src: url('../PfefferMediaeval.otf') format('opentype');
+}
+@font-face {
+    font-family: 'roman';
+    src: url('../RomanUncialModern.ttf') format('truetype');
+}

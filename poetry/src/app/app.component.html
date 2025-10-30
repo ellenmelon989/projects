@@ -1,0 +1,47 @@
+<div class="container">
+  <h1>Poetry Finder</h1>
+
+  <form (ngSubmit)="search()">
+    <div class="row">
+      <label>Author: </label>
+      <input name="author" [(ngModel)]="author" placeholder="e.g. Emily Dickinson" />
+    </div>
+
+    <div class="row">
+      <label>Title: </label>
+      <input name="title" [(ngModel)]="title" placeholder="e.g. Ozymandias" />
+    </div>
+    <div class="row">
+      <label>Show: </label>
+      <div class="actions">
+        <input name="showCount" type="number" min="1" [(ngModel)]="showCount" />
+        <span>poems</span>
+        <button type="submit">Search</button>
+        <button type="button" (click)="clear()">Clear</button>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="loading" class = "message">Loading...</div>
+  <div *ngIf="error" class="error message">Error: {{ error }}</div>
+
+  <div *ngIf="!loading && !error && poems.length === 0" class = "message">
+    No results found.
+  </div>
+
+  <ul class="poem-list" *ngIf="poems.length">
+  <li *ngFor="let p of poems | slice:0:showCount" class="poem parchment">
+      <h3>{{ p.title }} <small>by {{ p.author }}</small></h3>
+      <!-- <p><strong>Lines ({{p.linecount}})</strong></p> -->
+      <pre class="lines ink">{{(isExpanded(p) ? (p.lines ?? []) : (p.lines ?? []).slice(0,4)).join('\n')}}
+      </pre>
+
+      <div class="more" *ngIf="(p.lines ?? []).length > 4">
+        <button type="button" class="more-btn" (click)="toggleExpand(p)">{{ isExpanded(p) ? 'Show less' : 'Show more' }}
+        </button>
+      </div>
+
+      <p>Line count: {{ p.linecount }}</p>
+    </li>
+  </ul>
+</div>
